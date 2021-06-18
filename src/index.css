@@ -1,0 +1,130 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  margin: auto;
+  max-width: 38rem;
+}
+
+.status-light {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  margin: 5px;
+}
+
+.status-light[data-status]::after {
+  margin-left: 20px;
+}
+
+.status-light[data-status="inactive"] {
+  background-color: red;
+}
+
+.status-light[data-status="inactive"]::after {
+  content: "Inactive";
+}
+
+.status-light[data-status="active"] {
+  background-color: green;
+}
+.status-light[data-status="active"]::after {
+  content: "Activate";
+}
+
+.box {
+  margin: 20px auto;
+}
+
+.cav {
+  border: solid 1px black;
+}
+
+.cav[data-disabled="true"] {
+  background-color: whitesmoke;
+  cursor: not-allowed;
+}
+
+.box_net-status {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+}
+
+.label_speed {
+  font-size: 12px;
+  margin: 0 2px;
+}
+
+.label_speed[data-type="upstream"]::before {
+  content: "↑";
+}
+
+.label_speed[data-type="downstream"]::before {
+  content: "↓";
+}
+
+/* chatter */
+
+.chatroom-container {
+  display: grid;
+  grid-template-rows: 7fr 3fr;
+  height: 450px;
+  border: solid 1px black;
+}
+.chatroom-records {
+  word-break: break-all;
+  word-wrap: break-word;
+  overflow-y: scroll;
+  padding: 5px 3px;
+}
+.chatroom-records div {
+  margin: 10px auto;
+}
+.chatroom-records-author {
+  font-weight: 600;
+}
+.chatroom-records-author::after {
+  content: ":";
+  font-weight: 600;
+}
+.chatroom-records-decrypt-btn {
+  margin: auto 3px;
+}
+.chatroom-typearea {
+  border-top: solid 1px black;
+  display: grid;
+  grid-template-rows: auto 30px;
+}
+.chatroom-typearea-textarea {
+  border: none;
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-bottom: solid 1px black;
+  outline: none;
+  resize: none;
+  box-sizing: border-box;
+  padding: 5px 3px;
+}
+.chatroom-typearea-buttons {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+}
+.chatroom-typearea-buttons button {
+  margin: 0 3px;
+}
+
+.uid {
+  position: fixed;
+  left: 10px;
+  bottom: 10px;
+  font-size: 12px;
+}
+
+.record-log {
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 12px;
+}

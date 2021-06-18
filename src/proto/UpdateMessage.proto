@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package chatroompackage;
+
+message RoomUser {
+  required string uid = 1;
+}
+
+message RoomUsers {
+  repeated RoomUser users = 1;
+}
+
+message ChatText {
+  required string uid = 1;
+  required string text = 2;
+  required bool encrypted = 3;
+}
+
+message SignedPbk {
+  repeated string uids = 1;
+  required uint64 pbk = 2;
+}
+
+message UpdateMessage {
+  enum MessageKind {
+    // 每个client发送心跳包携带uid
+    HEARTBEAT = 0;
+
+    // server广播当前在线用户
+    BROADCAST_USERS = 1;
+    // server广播聊天室消息
+    BROADCAST_TEXT = 2;
+    // server广播log
+    BROADCAST_LOG = 3;
+
+    // 签发公钥
+    SIGN_PBK = 5;
+    
+    // server要求client更改状态为协商密钥
+    DEMAND_STATUS_PBK = 6;
+    // server要求client更改状态为聊天
+    DEMAND_STATUS_CHAT = 7;
+  }
+
+  required string uuid = 1;
+  required MessageKind message_kind = 2;
+
+  optional bytes chunk = 3;
+}

@@ -1,0 +1,51 @@
+{
+  "name": "chatroom",
+  "productName": "chatroom",
+  "version": "1.0.0",
+  "description": "My Electron application description",
+  "main": "target/index.js",
+  "scripts": {
+    "start": "npm run dev --",
+    "dev": "gulp dev",
+    "compile": "gulp compile",
+    "clean": "gulp clean",
+    "build:win": "gulp build --win portable",
+    "build:mac": "gulp build --mac",
+    "test": "ts-mocha -p tsconfig.json src/**/__test__/*.test.ts "
+  },
+  "keywords": [],
+  "author": {
+    "name": "ChenKS12138",
+    "email": "chen749923710@gmail.com"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0",
+    "protobufjs": "^6.11.2",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.14.3",
+    "@babel/preset-env": "^7.14.2",
+    "@babel/preset-react": "^7.13.13",
+    "@babel/preset-typescript": "^7.13.0",
+    "@types/electron": "^1.6.10",
+    "@types/mocha": "^8.2.2",
+    "@types/node": "^15.6.0",
+    "@types/react": "^17.0.6",
+    "@types/react-dom": "^17.0.5",
+    "@types/uuid": "^8.3.0",
+    "del": "^6.0.0",
+    "electron": "^12.0.5",
+    "electron-builder": "^22.10.5",
+    "gulp": "^4.0.2",
+    "gulp-babel": "^8.0.0",
+    "gulp-path-alias": "^1.2.1",
+    "mocha": "^9.0.0",
+    "ts-mocha": "^8.0.0",
+    "typescript": "^4.2.4",
+    "yargs": "^17.0.1"
+  }
+}
