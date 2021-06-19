@@ -4,9 +4,10 @@ import { ServerBroadcastStream } from "@/lib/stream/serverBroadcast";
 export function createServer() {
   const broadcastStream = new ServerBroadcastStream();
   const srv = net.createServer((socket) => {
-    broadcastStream.emit("joinNewClient", socket);
+    broadcastStream.emit("addClient", socket);
     broadcastStream.addSocket(socket);
     socket.on("end", () => {
+      broadcastStream.emit("removeClient", socket);
       broadcastStream.removeSocket(socket);
     });
   });

@@ -41,7 +41,16 @@ export function runServerApp(mainWindow: BrowserWindow) {
           constants.MessageKind.BROADCAST_HEARTBEAT,
           rpcEventDispatcher.uid
         );
+        rpcEventDispatcher.updateRenderUids();
       }, 500);
+    });
+
+    broadcastStream.on("addClient", () => {
+      rpcEventDispatcher.updateRenderUids();
+    });
+
+    broadcastStream.on("removeClient", () => {
+      rpcEventDispatcher.updateRenderUids();
     });
 
     broadcastStream.on("stopServer", () => {

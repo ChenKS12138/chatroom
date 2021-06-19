@@ -5,7 +5,7 @@ export class UidList {
   }[];
   private timeout: number;
   private serverUid: string;
-  constructor(serverUid, timeout = 3000) {
+  constructor(serverUid, timeout = 800) {
     this.list = [];
     this.timeout = timeout;
     this.serverUid = serverUid;

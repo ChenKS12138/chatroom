@@ -39,6 +39,7 @@ export function runClientApp(mainWindow: BrowserWindow) {
             constants.MessageKind.BROADCAST_HEARTBEAT,
             rpcEventDispatcher.uid
           );
+          rpcEventDispatcher.updateRenderUids();
         }, 500);
       });
 

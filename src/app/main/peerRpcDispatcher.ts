@@ -9,7 +9,7 @@ export default class PeerRpcDispatcher extends RpcEventDispatcher {
   uidList: UidList;
   constructor(webContents, ipcMain: Electron.IpcMain = electron.ipcMain) {
     super(webContents, ipcMain);
-    this.uidList = new UidList(this.uid, 10000);
+    this.uidList = new UidList(this.uid, 1000);
     this.pbkInfo = null;
   }
   encodeRpcUpdateMessageChunk(kind: MessageKind, ...args: any): Buffer {
@@ -52,7 +52,7 @@ export default class PeerRpcDispatcher extends RpcEventDispatcher {
         break;
       case MessageKind.BROADCAST_HEARTBEAT:
         this.uidList.update(chunk);
-        this.sendToIpcRender(ChannelType.UPDATE_UIDS, this.uidList.uids);
+        this.updateRenderUids();
         break;
       case MessageKind.DEMAND_STATUS_PBK:
         this.updatePrivateKey();
@@ -66,5 +66,8 @@ export default class PeerRpcDispatcher extends RpcEventDispatcher {
         break;
     }
     return [kind, chunk];
+  }
+  updateRenderUids() {
+    this.sendToIpcRender(ChannelType.UPDATE_UIDS, this.uidList.uids);
   }
 }

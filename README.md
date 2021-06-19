@@ -5,3 +5,23 @@ chatroom，使用 Diffie-Hellman 协商密钥，AES 进行加密的，使用 pro
 南邮信息安全综合实验 基于 Diffie-Hellman 的三方密钥交换算法
 
 ![example](https://github.com/ChenKS12138/chatroom/raw/main/image/example.gif)
+
+# 实现原理
+
+## 密钥协商
+
+基于 Diffie-Hellman 实现的密钥协商
+
+![diffie-hellman](https://github.com/ChenKS12138/chatroom/raw/main/image/diffie-hellman.png)
+
+## 消息加密通信
+
+使用协商密钥作为 AES 加密的对称密钥，进行加密通信
+
+![message-encryption](https://github.com/ChenKS12138/chatroom/raw/main/image/msssage-encryption.png)
+
+## 心跳包
+
+每个 peer 定时发送心跳包，并接受心跳包维护自己的 uidsList
+
+![heartbeat](https://github.com/ChenKS12138/chatroom/raw/main/image/heartbeat.png)
