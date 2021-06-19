@@ -111,7 +111,7 @@ export abstract class RpcEventDispatcher {
       currentPbk = quickMod(currentPbk, this.privateKey, generatePrime());
       currentUids.push(this.uid);
       this.log(
-        `密钥协商进度${currentUids.length}/${uids.length}, PBK ${currentPbk}`
+        `密钥协商${currentUids.length}/${uids.length}, PBK ${currentPbk}`
       );
       const pbkInfo = {
         pbk: currentPbk,

@@ -5,12 +5,15 @@ export class UidList {
   }[];
   private timeout: number;
   private serverUid: string;
-  constructor(serverUid, timeout = 10000) {
+  constructor(serverUid, timeout = 3000) {
     this.list = [];
     this.timeout = timeout;
     this.serverUid = serverUid;
   }
   update(uid: string) {
+    if (uid === this.serverUid) {
+      return;
+    }
     const target = this.list.find((one) => one.uid === uid);
     if (!target) {
       this.list.push({
@@ -27,4 +30,9 @@ export class UidList {
     );
     return [this.serverUid, ...this.list.map((one) => one.uid)];
   }
+}
+
+export function setImmediatelyInterval(callback: () => void, interval: number) {
+  callback();
+  return setInterval(callback, interval);
 }

@@ -24,8 +24,7 @@ export function runServerApp(mainWindow: BrowserWindow) {
 
     const rpcStream = new RpcStream(rpcEventDispatcher);
 
-    let broadcastUidsTimer;
-
+    let heartbeatTimer;
     broadcastStream.on("startServer", () => {
       mainWindow.webContents.send(
         constants.ChannelType.SERVER_ON_SERVE_START,
@@ -37,13 +36,12 @@ export function runServerApp(mainWindow: BrowserWindow) {
       ipcMain.once(constants.ChannelType.SERVER_STOP, () => {
         broadcastStream.emit("stopServer");
       });
-      broadcastUidsTimer = setInterval(() => {
-        rpcEventDispatcher.dispatchCall(constants.MessageKind.BROADCAST_USERS, {
-          users: rpcEventDispatcher.uidList.uids.map((one) => ({
-            uid: one,
-          })),
-        });
-      }, 1000);
+      heartbeatTimer = setInterval(() => {
+        rpcEventDispatcher.dispatchCall(
+          constants.MessageKind.BROADCAST_HEARTBEAT,
+          rpcEventDispatcher.uid
+        );
+      }, 500);
     });
 
     broadcastStream.on("stopServer", () => {
@@ -53,9 +51,13 @@ export function runServerApp(mainWindow: BrowserWindow) {
       broadcastStream.destroy();
       broadcastStream.end();
       mainWindow.webContents.send(constants.ChannelType.SERVER_ON_SERVE_STOP);
-      if (broadcastUidsTimer) {
-        clearInterval(broadcastUidsTimer);
-        broadcastUidsTimer = null;
+      if (heartbeatTimer) {
+        clearInterval(heartbeatTimer);
+        rpcEventDispatcher.sendToIpcRender(
+          constants.ChannelType.UPDATE_UIDS,
+          []
+        );
+        heartbeatTimer = null;
       }
     });
 

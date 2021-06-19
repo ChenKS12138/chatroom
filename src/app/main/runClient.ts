@@ -12,6 +12,7 @@ import {
 } from "@/lib/stream";
 import { RpcStream } from "@/lib/stream/rpc";
 import ClientRpcDispatcher from "./clientRpcDispatcher";
+import { setImmediatelyInterval } from "@/common/util";
 
 export function runClientApp(mainWindow: BrowserWindow) {
   ipcMain.on(
@@ -33,12 +34,12 @@ export function runClientApp(mainWindow: BrowserWindow) {
         mainWindow.webContents.send(
           constants.ChannelType.CLIENT_ON_SERVER_CONNECTED
         );
-        heartbeatTimer = setInterval(() => {
+        heartbeatTimer = setImmediatelyInterval(() => {
           rpcEventDispatcher.dispatchCall(
-            constants.MessageKind.HEARTBEAT,
+            constants.MessageKind.BROADCAST_HEARTBEAT,
             rpcEventDispatcher.uid
           );
-        }, 1000);
+        }, 500);
       });
 
       connection.on("close", () => {
@@ -47,6 +48,10 @@ export function runClientApp(mainWindow: BrowserWindow) {
         );
         if (heartbeatTimer) {
           clearInterval(heartbeatTimer);
+          rpcEventDispatcher.sendToIpcRender(
+            constants.ChannelType.UPDATE_UIDS,
+            []
+          );
           heartbeatTimer = null;
         }
         connection.destroy();

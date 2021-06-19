@@ -1,4 +1,10 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useCrypto } from "../../hooks/cryptoHook";
 import { useMessageValue } from "../../hooks/messageHook";
 import * as constants from "@/common/constants";
@@ -32,6 +38,7 @@ export function Chatter({
 }: IChatter) {
   const [text, setText] = useState("");
   const chatterDisabled = useMemo(() => disabled || false, [disabled]);
+  const recordsRef = useRef<any>(null);
 
   const handleType = useCallback(
     (event) => {
@@ -40,9 +47,15 @@ export function Chatter({
     [setText]
   );
 
+  useEffect(() => {
+    if (recordsRef.current) {
+      recordsRef.current.scrollTop = recordsRef.current.scrollHeight;
+    }
+  }, [records, recordsRef]);
+
   return (
     <div className="chatroom-container">
-      <div className="chatroom-records">
+      <div className="chatroom-records" ref={recordsRef}>
         {records.map((record, index) => (
           <ChatRecord
             key={index}
@@ -62,7 +75,7 @@ export function Chatter({
         ></textarea>
         <div className="chatroom-typearea-buttons">
           <button
-            disabled={chatterDisabled}
+            disabled={chatterDisabled || !text.length}
             onClick={() => {
               setText("");
               onSendText && onSendText(text, false);
@@ -71,7 +84,7 @@ export function Chatter({
             明文发送
           </button>
           <button
-            disabled={!enableEncrypt || chatterDisabled}
+            disabled={!enableEncrypt || chatterDisabled || !text.length}
             onClick={() => {
               setText("");
               onSendText && onSendText(text, true);

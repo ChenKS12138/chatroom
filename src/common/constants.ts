@@ -1,21 +1,19 @@
 export enum MessageKind {
   // 每个client发送心跳包携带uid
-  HEARTBEAT = 0,
+  BROADCAST_HEARTBEAT = 0,
 
-  // server广播当前在线用户
-  BROADCAST_USERS = 1,
   // server广播聊天室消息
-  BROADCAST_TEXT = 2,
+  BROADCAST_TEXT = 1,
   // server广播log
-  BROADCAST_LOG = 3,
+  BROADCAST_LOG = 2,
 
   // 签发公钥
-  SIGN_PBK = 5,
+  SIGN_PBK = 3,
 
   // server要求client更改状态为协商密钥
-  DEMAND_STATUS_PBK = 6,
+  DEMAND_STATUS_PBK = 4,
   // server要求client更改状态为聊天
-  DEMAND_STATUS_CHAT = 7,
+  DEMAND_STATUS_CHAT = 5,
 }
 
 export enum ChannelType {
@@ -44,6 +42,7 @@ export enum ChannelType {
 
   UPDATE_UID = "updateUid",
   UPDATE_PBK = "updatePbk",
+  UPDATE_UIDS = "updateUids",
 }
 
 export enum ConnectionStatus {

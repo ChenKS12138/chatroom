@@ -17,6 +17,7 @@ export default function App() {
   const [disableChatter, setDisableChatter] = useState(false);
   const uid = useMessageValue(constants.ChannelType.UPDATE_UID);
   const pbk = useMessageValue<string>(constants.ChannelType.UPDATE_PBK);
+  const uids = useMessageValue<string[]>(constants.ChannelType.UPDATE_UIDS);
   const { encrypt } = useCrypto();
 
   const rpcCall = useRpcCall();
@@ -128,7 +129,10 @@ export default function App() {
         disabled={!isWorking || disableChatter}
         enableEncrypt={!!pbk?.length}
       />
-      <div className="uid">uid: {uid}</div>
+      <div className="pinned-info">
+        <div>房间在线人数: {uids?.length ?? 0}</div>
+        <div>uid: {uid ?? "(进入房间自动生成uid)"}</div>
+      </div>
     </div>
   );
 }

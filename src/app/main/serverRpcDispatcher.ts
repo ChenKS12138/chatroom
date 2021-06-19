@@ -1,4 +1,4 @@
-import { MessageKind } from "@/common/constants";
+import { ChannelType, MessageKind } from "@/common/constants";
 import { ISignedPbk, IRoomUser, IUpdateMessage } from "@/common/interface";
 import { UidList } from "@/common/util";
 import { RpcEventDispatcher } from "@/lib/stream/rpc";
@@ -13,9 +13,6 @@ export default class ServerRpcDispatcher extends RpcEventDispatcher {
     this.pbkInfo = null;
   }
   encodeRpcUpdateMessageChunk(kind: MessageKind, ...args: any): Buffer {
-    if (kind === MessageKind.BROADCAST_USERS) {
-      return this.encodeProto(proto.RoomUsers, args[0]);
-    }
     if (kind === MessageKind.BROADCAST_TEXT) {
       return this.encodeProto(proto.ChatText, args[0]);
     }
@@ -25,9 +22,6 @@ export default class ServerRpcDispatcher extends RpcEventDispatcher {
     return Buffer.from(args[0]);
   }
   decodeRpcUpdateMessageChunk(kind: MessageKind, chunk: Buffer): any {
-    if (kind === MessageKind.BROADCAST_USERS) {
-      return this.decodeProto(proto.RoomUsers, chunk);
-    }
     if (kind === MessageKind.BROADCAST_TEXT) {
       return this.decodeProto(proto.ChatText, chunk);
     }
@@ -49,8 +43,9 @@ export default class ServerRpcDispatcher extends RpcEventDispatcher {
     return [kind, chunk];
   }
   onDispatchRsp(kind: MessageKind, chunk: any): [MessageKind, ...any[]] {
-    if (kind === MessageKind.HEARTBEAT) {
+    if (kind === MessageKind.BROADCAST_HEARTBEAT) {
       this.uidList.update(chunk);
+      this.sendToIpcRender(ChannelType.UPDATE_UIDS, this.uidList.uids);
     } else if (kind === MessageKind.DEMAND_STATUS_PBK) {
       this.updatePrivateKey();
       process.nextTick(() => {
