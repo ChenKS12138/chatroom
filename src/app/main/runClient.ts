@@ -11,7 +11,7 @@ import {
   UpdateMessageEncodeStream,
 } from "@/lib/stream";
 import { RpcStream } from "@/lib/stream/rpc";
-import ClientRpcDispatcher from "./clientRpcDispatcher";
+import PeerRpcDispatcher from "./peerRpcDispatcher";
 import { setImmediatelyInterval } from "@/common/util";
 
 export function runClientApp(mainWindow: BrowserWindow) {
@@ -23,7 +23,7 @@ export function runClientApp(mainWindow: BrowserWindow) {
         host,
       });
 
-      const rpcEventDispatcher = new ClientRpcDispatcher(
+      const rpcEventDispatcher = new PeerRpcDispatcher(
         mainWindow.webContents,
         ipcMain
       );

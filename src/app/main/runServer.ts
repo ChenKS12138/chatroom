@@ -10,14 +10,14 @@ import {
   UpdateMessageDecodeStream,
   UpdateMessageEncodeStream,
 } from "@/lib/stream";
-import ServerRpcDispatcher from "./serverRpcDispatcher";
+import PeerRpcDispatcher from "./peerRpcDispatcher";
 import { RpcStream } from "@/lib/stream/rpc";
 
 export function runServerApp(mainWindow: BrowserWindow) {
   ipcMain.on(constants.ChannelType.SERVER_START, (_evt) => {
     const { broadcastStream, srv } = createServer();
 
-    const rpcEventDispatcher = new ServerRpcDispatcher(
+    const rpcEventDispatcher = new PeerRpcDispatcher(
       mainWindow.webContents,
       ipcMain
     );

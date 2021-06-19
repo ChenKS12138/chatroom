@@ -5,7 +5,7 @@ import { RpcEventDispatcher } from "@/lib/stream/rpc";
 import * as proto from "@/proto";
 import electron from "electron";
 
-export default class ServerRpcDispatcher extends RpcEventDispatcher {
+export default class PeerRpcDispatcher extends RpcEventDispatcher {
   uidList: UidList;
   constructor(webContents, ipcMain: Electron.IpcMain = electron.ipcMain) {
     super(webContents, ipcMain);
@@ -31,29 +31,39 @@ export default class ServerRpcDispatcher extends RpcEventDispatcher {
     return Buffer.from(chunk).toString("utf8");
   }
   onDispatchCall(kind: MessageKind, chunk: Buffer): [MessageKind, ...any[]] {
-    if (kind === MessageKind.BROADCAST_TEXT) {
-      this.dispatchRsp(MessageKind.BROADCAST_TEXT, chunk);
-    } else if (kind === MessageKind.DEMAND_STATUS_PBK) {
-      this.updatePrivateKey();
-      process.nextTick(() => {
-        this.negotiatePbk(this.uidList.uids);
-      });
-      this.dispatchRsp(MessageKind.DEMAND_STATUS_PBK);
+    switch (kind) {
+      case MessageKind.BROADCAST_TEXT:
+        this.dispatchRsp(MessageKind.BROADCAST_TEXT, chunk);
+        break;
+      case MessageKind.DEMAND_STATUS_PBK:
+        this.updatePrivateKey();
+        process.nextTick(() => {
+          this.negotiatePbk(this.uidList.uids);
+        });
+        this.dispatchRsp(MessageKind.DEMAND_STATUS_PBK);
+        break;
     }
     return [kind, chunk];
   }
   onDispatchRsp(kind: MessageKind, chunk: any): [MessageKind, ...any[]] {
-    if (kind === MessageKind.BROADCAST_HEARTBEAT) {
-      this.uidList.update(chunk);
-      this.sendToIpcRender(ChannelType.UPDATE_UIDS, this.uidList.uids);
-    } else if (kind === MessageKind.DEMAND_STATUS_PBK) {
-      this.updatePrivateKey();
-      process.nextTick(() => {
-        this.negotiatePbk(this.uidList.uids);
-      });
-    } else if (kind === MessageKind.SIGN_PBK) {
-      const signedPbk: ISignedPbk = chunk;
-      this.negotiatePbk(this.uidList.uids, signedPbk.pbk, signedPbk.uids);
+    switch (kind) {
+      case MessageKind.BROADCAST_LOG:
+        this.log(Buffer.from(chunk).toString("utf8"));
+        break;
+      case MessageKind.BROADCAST_HEARTBEAT:
+        this.uidList.update(chunk);
+        this.sendToIpcRender(ChannelType.UPDATE_UIDS, this.uidList.uids);
+        break;
+      case MessageKind.DEMAND_STATUS_PBK:
+        this.updatePrivateKey();
+        process.nextTick(() => {
+          this.negotiatePbk(this.uidList.uids);
+        });
+        break;
+      case MessageKind.SIGN_PBK:
+        const signedPbk: ISignedPbk = chunk;
+        this.negotiatePbk(this.uidList.uids, signedPbk.pbk, signedPbk.uids);
+        break;
     }
     return [kind, chunk];
   }
