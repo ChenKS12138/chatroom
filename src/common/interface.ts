@@ -1,5 +1,4 @@
 import * as constants from "./constants";
-import type { Readable } from "stream";
 
 export interface IUpdateMessage {
   uuid: string;
@@ -20,6 +19,7 @@ export interface IChatText {
   uid: string;
   text: string;
   encrypted: boolean;
+  timestamp: number;
 }
 
 export interface ISignedPbk {

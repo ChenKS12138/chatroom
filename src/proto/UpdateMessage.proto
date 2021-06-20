@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package chatroompackage;
 
+import "google/protobuf/timestamp.proto";
+
 message RoomUser {
   required string uid = 1;
 }
@@ -14,11 +16,12 @@ message ChatText {
   required string uid = 1;
   required string text = 2;
   required bool encrypted = 3;
+  required double timestamp = 4;
 }
 
 message SignedPbk {
   repeated string uids = 1;
-  required uint64 pbk = 2;
+  required double pbk = 2;
 }
 
 message UpdateMessage {

@@ -8,16 +8,14 @@ import React, {
 import { useCrypto } from "../../hooks/cryptoHook";
 import { useMessageValue } from "../../hooks/messageHook";
 import * as constants from "@/common/constants";
+import { IChatText } from "@/common/interface";
 
 export enum ChatterRecordType {
   MESSAGE = 0,
   LOG = 1,
 }
 
-export interface IChatterRecord {
-  uid?: string;
-  text: string;
-  encrypted?: boolean;
+export interface IChatterRecord extends IChatText {
   type: ChatterRecordType;
 }
 
@@ -63,6 +61,7 @@ export function Chatter({
             uid={record?.uid ?? ""}
             encrypted={record?.encrypted ?? false}
             type={record.type}
+            timestamp={record.timestamp}
           />
         ))}
       </div>

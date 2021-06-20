@@ -14,6 +14,7 @@ import electron from "electron";
 export default class PeerRpcDispatcher extends RpcEventDispatcher {
   uidList: UidList;
   static NEGOTIATE_PBK_TIMEOUT = 3000; // 3000ms
+  private negotiateTimer: any;
   constructor(webContents, ipcMain: Electron.IpcMain = electron.ipcMain) {
     super(webContents, ipcMain);
     this.uidList = new UidList(this.uid, 1000);
@@ -24,6 +25,7 @@ export default class PeerRpcDispatcher extends RpcEventDispatcher {
     this.uidList.emitter.on(UidList.EVENT_UID_NEW, (uid) => {
       this.log(`${uid}加入了聊天室`);
     });
+    this.negotiateTimer = null;
   }
   encodeRpcUpdateMessageChunk(kind: MessageKind, ...args: any): Buffer {
     if (kind === MessageKind.BROADCAST_TEXT) {
@@ -85,13 +87,17 @@ export default class PeerRpcDispatcher extends RpcEventDispatcher {
     process.nextTick(() => {
       this.pbkInfo = null;
       this.negotiatePbk(this.uidList.uids);
-      setTimeout(() => {
+      if (this.negotiateTimer !== null) {
+        clearTimeout(this.negotiateTimer);
+      }
+      this.negotiateTimer = setTimeout(() => {
         if (this.pbkInfo === null) {
           this.log(
             `协商密钥超时(${PeerRpcDispatcher.NEGOTIATE_PBK_TIMEOUT}ms)，请重试!!!`
           );
           this.dispatchCall(MessageKind.DEMAND_STATUS_CHAT);
         }
+        this.negotiateTimer = null;
       }, PeerRpcDispatcher.NEGOTIATE_PBK_TIMEOUT);
     });
   }
@@ -117,6 +123,8 @@ export default class PeerRpcDispatcher extends RpcEventDispatcher {
         this.sendToIpcRender(ChannelType.UPDATE_PBK, String(currentPbk));
         this.log(`密钥协商结束, 请使用密钥${currentPbk}加密聊天`);
         this.dispatchCall(MessageKind.DEMAND_STATUS_CHAT);
+        clearTimeout(this.negotiateTimer);
+        this.negotiateTimer = null;
       }
     }
   }

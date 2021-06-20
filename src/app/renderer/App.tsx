@@ -42,13 +42,15 @@ export default function App() {
     MessageKind.BROADCAST_TEXT,
     (chatText: IChatText) => {
       setRecords((records) => {
-        return [
+        const nextRecords = [
           ...records,
           {
             ...chatText,
             type: ChatterRecordType.MESSAGE,
           },
         ];
+        nextRecords.sort((a, b) => a.timestamp - b.timestamp);
+        return nextRecords;
       });
     },
     [setRecords]
@@ -85,15 +87,20 @@ export default function App() {
 
   useMessageListener(
     constants.ChannelType.LOG,
-    (message) => {
+    (message: string, timestamp: number) => {
       setRecords((records) => {
-        return [
+        const nextRecords = [
           ...records,
           {
             text: message,
+            uid: "",
+            encrypted: false,
             type: ChatterRecordType.LOG,
+            timestamp,
           },
         ];
+        nextRecords.sort((a, b) => a.timestamp - b.timestamp);
+        return nextRecords;
       });
     },
     [setRecords]
@@ -112,6 +119,7 @@ export default function App() {
         uid: uid,
         text,
         encrypted: needEncrypt,
+        timestamp: Date.now(),
       });
     },
     [rpcCall, uid, pbk]

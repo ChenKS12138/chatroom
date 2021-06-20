@@ -77,11 +77,11 @@ export abstract class RpcEventDispatcher {
     this.emitter.write(this.generateUpdateMessage(kind, ...args));
   }
   log(message: string) {
-    this.webContents.send(ChannelType.LOG, message);
+    this.webContents.send(ChannelType.LOG, message, Date.now());
   }
   broadcastLog(message: string) {
     this.log(message);
-    this.dispatchCall(MessageKind.BROADCAST_LOG, message);
+    this.dispatchCall(MessageKind.BROADCAST_LOG, message, Date.now());
   }
   sendToIpcRender(channel, ...args) {
     this.webContents.send(channel, ...args);
