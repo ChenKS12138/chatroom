@@ -1,23 +1,27 @@
 import * as net from "net";
-import { ServerBroadcastStream } from "@/lib/stream/serverBroadcast";
+import { BroadcastHub } from "@/lib/stream/broadcast";
 
 export function createServer() {
-  const broadcastStream = new ServerBroadcastStream();
+  const broadcastHub = new BroadcastHub();
   const srv = net.createServer((socket) => {
-    broadcastStream.emit("addClient", socket);
-    broadcastStream.addSocket(socket);
+    broadcastHub.serverPort.emit("addClient", socket);
+    broadcastHub.addSocket(socket);
     socket.on("end", () => {
-      broadcastStream.emit("removeClient", socket);
-      broadcastStream.removeSocket(socket);
+      broadcastHub.serverPort.emit("removeClient", socket);
+      broadcastHub.destroy();
     });
   });
   srv.listen({ port: 0, host: "0.0.0.0" }, () => {
-    broadcastStream.emit("startServer");
+    broadcastHub.serverPort.emit("startServer");
+  });
+
+  srv.on("close", () => {
+    broadcastHub.destroy();
   });
 
   return {
     srv,
-    broadcastStream,
+    serverPort: broadcastHub.serverPort,
   };
 }
 

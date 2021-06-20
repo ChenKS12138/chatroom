@@ -10,4 +10,4 @@ export {
   UpdateMessageEncodeStream,
 } from "./updateMessage";
 
-export { ServerBroadcastStream } from "./serverBroadcast";
+export { BroadcastHub, HubStream, createTeleports } from "./broadcast";

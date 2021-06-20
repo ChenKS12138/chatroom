@@ -32,9 +32,6 @@ export default class PeerRpcDispatcher extends RpcEventDispatcher {
   }
   onDispatchCall(kind: MessageKind, chunk: Buffer): [MessageKind, ...any[]] {
     switch (kind) {
-      case MessageKind.BROADCAST_TEXT:
-        this.dispatchRsp(MessageKind.BROADCAST_TEXT, chunk);
-        break;
       case MessageKind.DEMAND_STATUS_PBK:
         this.updatePrivateKey();
         process.nextTick(() => {
@@ -45,7 +42,11 @@ export default class PeerRpcDispatcher extends RpcEventDispatcher {
     }
     return [kind, chunk];
   }
-  onDispatchRsp(kind: MessageKind, chunk: any): [MessageKind, ...any[]] {
+  onDispatchRsp(
+    kind: MessageKind,
+    src: string,
+    chunk: any
+  ): [MessageKind, ...any[]] {
     switch (kind) {
       case MessageKind.BROADCAST_LOG:
         this.log(Buffer.from(chunk).toString("utf8"));

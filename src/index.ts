@@ -33,3 +33,7 @@ app.on("activate", () => {
     createWindow();
   }
 });
+
+process.on("uncaughtException", (err) => {
+  console.error(err);
+});

@@ -24,7 +24,6 @@ export class RpcStream extends stream.Duplex {
         this.rpcEventDispatcher.emitter.pause();
       }
     });
-    this.rpcEventDispatcher.emitter.pipe(this);
   }
   _read() {
     this.rpcEventDispatcher.emitter.resume();
@@ -32,6 +31,7 @@ export class RpcStream extends stream.Duplex {
   _write(updateMessage: IUpdateMessage, _encoding, callback) {
     this.rpcEventDispatcher._dispatchRsp(
       updateMessage.messageKind,
+      updateMessage.src,
       updateMessage?.chunk
     );
     callback();
@@ -61,10 +61,11 @@ export abstract class RpcEventDispatcher {
     this.privateKey = generatePrivateKey();
     this.pbkInfo = null;
   }
-  _dispatchRsp(kind: MessageKind, chunk?: Buffer) {
+  _dispatchRsp(kind: MessageKind, src: string, chunk?: Buffer) {
     this.dispatchRsp(
       ...this.onDispatchRsp(
         kind,
+        src,
         chunk && this.decodeRpcUpdateMessageChunk(kind, chunk)
       )
     );
@@ -88,6 +89,7 @@ export abstract class RpcEventDispatcher {
   generateUpdateMessage(messageKind, ...args): IUpdateMessage {
     const payload: IUpdateMessage = {
       uuid: uuidv4(),
+      src: this.uid,
       messageKind,
     };
     if (args?.length) {

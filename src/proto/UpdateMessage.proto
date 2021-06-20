@@ -41,7 +41,8 @@ message UpdateMessage {
   }
 
   required string uuid = 1;
-  required MessageKind message_kind = 2;
+  required string src = 2;
+  required MessageKind message_kind = 3;
 
-  optional bytes chunk = 3;
+  optional bytes chunk = 4;
 }

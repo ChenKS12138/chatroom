@@ -15,7 +15,7 @@ import { RpcStream } from "@/lib/stream/rpc";
 
 export function runServerApp(mainWindow: BrowserWindow) {
   ipcMain.on(constants.ChannelType.SERVER_START, (_evt) => {
-    const { broadcastStream, srv } = createServer();
+    const { srv, serverPort } = createServer();
 
     const rpcEventDispatcher = new PeerRpcDispatcher(
       mainWindow.webContents,
@@ -25,16 +25,16 @@ export function runServerApp(mainWindow: BrowserWindow) {
     const rpcStream = new RpcStream(rpcEventDispatcher);
 
     let heartbeatTimer;
-    broadcastStream.on("startServer", () => {
+    serverPort.on("startServer", () => {
       mainWindow.webContents.send(
         constants.ChannelType.SERVER_ON_SERVE_START,
         srv.address()
       );
       app.once("window-all-closed", () => {
-        broadcastStream.emit("stopServer");
+        serverPort.emit("stopServer");
       });
       ipcMain.once(constants.ChannelType.SERVER_STOP, () => {
-        broadcastStream.emit("stopServer");
+        serverPort.emit("stopServer");
       });
       heartbeatTimer = setInterval(() => {
         rpcEventDispatcher.dispatchCall(
@@ -45,20 +45,20 @@ export function runServerApp(mainWindow: BrowserWindow) {
       }, 500);
     });
 
-    broadcastStream.on("addClient", () => {
+    serverPort.on("addClient", () => {
       rpcEventDispatcher.updateRenderUids();
     });
 
-    broadcastStream.on("removeClient", () => {
+    serverPort.on("removeClient", () => {
       rpcEventDispatcher.updateRenderUids();
     });
 
-    broadcastStream.on("stopServer", () => {
+    serverPort.on("stopServer", () => {
       srv.close(() => {
         srv.unref();
       });
-      broadcastStream.destroy();
-      broadcastStream.end();
+      serverPort.destroy();
+      serverPort.end();
       mainWindow.webContents.send(constants.ChannelType.SERVER_ON_SERVE_STOP);
       if (heartbeatTimer) {
         clearInterval(heartbeatTimer);
@@ -72,7 +72,7 @@ export function runServerApp(mainWindow: BrowserWindow) {
 
     // Pipe Msg, Client -> Server
     stream.pipeline(
-      broadcastStream,
+      serverPort,
       new SizePrefixedChunkDecodeStream(),
       new DecompressStream(),
       new UpdateMessageDecodeStream(),
@@ -86,7 +86,7 @@ export function runServerApp(mainWindow: BrowserWindow) {
       new UpdateMessageEncodeStream(),
       new CompressStream(),
       new SizePrefixedChunkEncodeStream(),
-      broadcastStream,
+      serverPort,
       () => {}
     );
   });

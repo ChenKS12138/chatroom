@@ -3,6 +3,7 @@ import type { Readable } from "stream";
 
 export interface IUpdateMessage {
   uuid: string;
+  src: string;
   messageKind: constants.MessageKind;
   chunk?: Buffer;
 }
