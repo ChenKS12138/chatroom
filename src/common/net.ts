@@ -8,7 +8,6 @@ export function createServer() {
     broadcastHub.addSocket(socket);
     socket.on("end", () => {
       broadcastHub.serverPort.emit("removeClient", socket);
-      broadcastHub.destroy();
     });
   });
   srv.listen({ port: 0, host: "0.0.0.0" }, () => {

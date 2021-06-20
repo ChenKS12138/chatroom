@@ -13,10 +13,17 @@ import electron from "electron";
 
 export default class PeerRpcDispatcher extends RpcEventDispatcher {
   uidList: UidList;
+  static NEGOTIATE_PBK_TIMEOUT = 3000; // 3000ms
   constructor(webContents, ipcMain: Electron.IpcMain = electron.ipcMain) {
     super(webContents, ipcMain);
     this.uidList = new UidList(this.uid, 1000);
     this.pbkInfo = null;
+    this.uidList.emitter.on(UidList.EVENT_UID_OUTDATE, (uid) => {
+      this.log(`${uid}退出了聊天室`);
+    });
+    this.uidList.emitter.on(UidList.EVENT_UID_NEW, (uid) => {
+      this.log(`${uid}加入了聊天室`);
+    });
   }
   encodeRpcUpdateMessageChunk(kind: MessageKind, ...args: any): Buffer {
     if (kind === MessageKind.BROADCAST_TEXT) {
@@ -39,10 +46,7 @@ export default class PeerRpcDispatcher extends RpcEventDispatcher {
   onDispatchCall(kind: MessageKind, chunk: Buffer): [MessageKind, ...any[]] {
     switch (kind) {
       case MessageKind.DEMAND_STATUS_PBK:
-        this.updatePrivateKey();
-        process.nextTick(() => {
-          this.negotiatePbk(this.uidList.uids);
-        });
+        this.startNegotiatePbk();
         this.dispatchRsp(MessageKind.DEMAND_STATUS_PBK);
         break;
     }
@@ -62,10 +66,7 @@ export default class PeerRpcDispatcher extends RpcEventDispatcher {
         this.updateRenderUids();
         break;
       case MessageKind.DEMAND_STATUS_PBK:
-        this.updatePrivateKey();
-        process.nextTick(() => {
-          this.negotiatePbk(this.uidList.uids);
-        });
+        this.startNegotiatePbk();
         break;
       case MessageKind.SIGN_PBK:
         const signedPbk: ISignedPbk = chunk;
@@ -78,6 +79,21 @@ export default class PeerRpcDispatcher extends RpcEventDispatcher {
   }
   updateRenderUids() {
     this.sendToIpcRender(ChannelType.UPDATE_UIDS, this.uidList.uids);
+  }
+  startNegotiatePbk() {
+    this.updatePrivateKey();
+    process.nextTick(() => {
+      this.pbkInfo = null;
+      this.negotiatePbk(this.uidList.uids);
+      setTimeout(() => {
+        if (this.pbkInfo === null) {
+          this.log(
+            `协商密钥超时(${PeerRpcDispatcher.NEGOTIATE_PBK_TIMEOUT}ms)，请重试!!!`
+          );
+          this.dispatchCall(MessageKind.DEMAND_STATUS_CHAT);
+        }
+      }, PeerRpcDispatcher.NEGOTIATE_PBK_TIMEOUT);
+    });
   }
   negotiatePbk(
     uids: string[],
