@@ -4,14 +4,14 @@ export class UidList {
     timestamp: number;
   }[];
   private timeout: number;
-  private serverUid: string;
-  constructor(serverUid, timeout = 800) {
+  private selfUid: string;
+  constructor(selfUid, timeout = 800) {
     this.list = [];
     this.timeout = timeout;
-    this.serverUid = serverUid;
+    this.selfUid = selfUid;
   }
   update(uid: string) {
-    if (uid === this.serverUid) {
+    if (uid === this.selfUid) {
       return;
     }
     const target = this.list.find((one) => one.uid === uid);
@@ -28,7 +28,17 @@ export class UidList {
     this.list = this.list.filter(
       (one) => Date.now() - one.timestamp < this.timeout
     );
-    return [this.serverUid, ...this.list.map((one) => one.uid)];
+    return [this.selfUid, ...this.list.map((one) => one.uid)];
+  }
+  get leftPeer(): string {
+    if (this.list.length < 2) return this.selfUid;
+    const uids = this.uids;
+    uids.sort();
+    const index = uids.findIndex((one) => one === this.selfUid);
+    if (index === 0) {
+      return uids[uids.length - 1];
+    }
+    return uids[index - 1];
   }
 }
 

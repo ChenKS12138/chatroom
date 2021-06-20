@@ -1,6 +1,12 @@
 import { ChannelType, MessageKind } from "@/common/constants";
 import { ISignedPbk, IRoomUser, IUpdateMessage } from "@/common/interface";
 import { UidList } from "@/common/util";
+import {
+  generateG,
+  generatePrime,
+  generatePrivateKey,
+  quickMod,
+} from "@/lib/diffie-hellman/diffie-hellman";
 import { RpcEventDispatcher } from "@/lib/stream/rpc";
 import * as proto from "@/proto";
 import electron from "electron";
@@ -63,12 +69,43 @@ export default class PeerRpcDispatcher extends RpcEventDispatcher {
         break;
       case MessageKind.SIGN_PBK:
         const signedPbk: ISignedPbk = chunk;
-        this.negotiatePbk(this.uidList.uids, signedPbk.pbk, signedPbk.uids);
+        if (src === this.uidList.leftPeer) {
+          this.negotiatePbk(this.uidList.uids, signedPbk.pbk, signedPbk.uids);
+        }
         break;
     }
     return [kind, chunk];
   }
   updateRenderUids() {
     this.sendToIpcRender(ChannelType.UPDATE_UIDS, this.uidList.uids);
+  }
+  negotiatePbk(
+    uids: string[],
+    currentPbk: number = generateG(),
+    currentUids: string[] = []
+  ) {
+    if (currentPbk && !currentUids.includes(this.uid)) {
+      currentPbk = quickMod(currentPbk, this.privateKey, generatePrime());
+      currentUids.push(this.uid);
+      this.log(
+        `密钥协商${currentUids.length}/${uids.length}, PBK ${currentPbk}`
+      );
+      const pbkInfo = {
+        pbk: currentPbk,
+        uids: currentUids,
+      };
+      if (currentUids.length < uids.length) {
+        this.dispatchCall(MessageKind.SIGN_PBK, pbkInfo);
+      } else {
+        this.pbkInfo = pbkInfo;
+        this.sendToIpcRender(ChannelType.UPDATE_PBK, String(currentPbk));
+        this.log(`密钥协商结束, 请使用密钥${currentPbk}加密聊天`);
+        this.dispatchCall(MessageKind.DEMAND_STATUS_CHAT);
+      }
+    }
+  }
+  updatePrivateKey() {
+    this.privateKey = generatePrivateKey();
+    this.log(`请勿泄露!!!私钥为${this.privateKey}`);
   }
 }

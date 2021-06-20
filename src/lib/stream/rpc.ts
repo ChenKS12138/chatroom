@@ -104,35 +104,6 @@ export abstract class RpcEventDispatcher {
   decodeProto<T extends any>(protoShape: Type, chunk: Buffer): T {
     return protoShape.decode(chunk) as T;
   }
-  negotiatePbk(
-    uids: string[],
-    currentPbk: number = generateG(),
-    currentUids: string[] = []
-  ) {
-    if (currentPbk && !currentUids.includes(this.uid)) {
-      currentPbk = quickMod(currentPbk, this.privateKey, generatePrime());
-      currentUids.push(this.uid);
-      this.log(
-        `密钥协商${currentUids.length}/${uids.length}, PBK ${currentPbk}`
-      );
-      const pbkInfo = {
-        pbk: currentPbk,
-        uids: currentUids,
-      };
-      if (currentUids.length < uids.length) {
-        this.dispatchCall(MessageKind.SIGN_PBK, pbkInfo);
-      } else {
-        this.pbkInfo = pbkInfo;
-        this.sendToIpcRender(ChannelType.UPDATE_PBK, String(currentPbk));
-        this.log(`密钥协商结束, 请使用密钥${currentPbk}加密聊天`);
-        this.dispatchCall(MessageKind.DEMAND_STATUS_CHAT);
-      }
-    }
-  }
-  updatePrivateKey() {
-    this.privateKey = generatePrivateKey();
-    this.log(`请勿泄露!!!私钥为${this.privateKey}`);
-  }
   abstract encodeRpcUpdateMessageChunk(kind: MessageKind, ...args: any): Buffer;
   abstract decodeRpcUpdateMessageChunk(kind: MessageKind, chunk: Buffer): any;
   abstract onDispatchRsp(
