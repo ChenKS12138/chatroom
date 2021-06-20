@@ -1,3 +1,5 @@
+import Long from "long";
+
 /**
  * 快速幂取模算法
  * @param {number} a
@@ -5,28 +7,25 @@
  * @param {number} c
  * @returns {number} (a^b)%c
  */
-export function quickMod(a: number, b: number, c: number) {
-  let ans = 1;
-  a = a % c;
-  while (b !== 0) {
-    if (b & 1) {
-      ans = (ans * a) % c;
+export function quickMod(a: Long, b: Long, c: Long): Long {
+  let ans = new Long(1);
+  a = a.mod(c);
+  while (b.notEquals(0)) {
+    if (b.and(1).notEquals(0)) {
+      ans = ans.multiply(a).mod(c);
     }
-    b >>= 1;
-    a = (a * a) % c;
+    b = b.shiftRight(1);
+    a = a.multiply(a).mod(c);
   }
   return ans;
 }
 
 /**
- * TODO
- * 需要选取一个更大的质数，来确共享密钥的空间足够大，防止暴力攻击
- * https://datatracker.ietf.org/doc/html/rfc3526#page-3
  * @param length
  * @returns {number}
  */
-export function generatePrime(length?: number) {
-  return 915799;
+export function generatePrime(length?: number): Long {
+  return new Long(99194853094755497);
 }
 
 /**
@@ -34,16 +33,16 @@ export function generatePrime(length?: number) {
  * @param length
  * @returns
  */
-export function generatePrivateKey(length?: number) {
-  return Math.floor(Math.random() * 1000000) + 1000000;
+export function generatePrivateKey(length?: number): Long {
+  return new Long(Math.ceil(Math.random() * 99194853094755497));
 }
 
 /**
  * 生成生成元
  * @returns
  */
-export function generateG() {
-  return 2;
+export function generateG(): Long {
+  return new Long(2);
 }
 
 /**
@@ -54,9 +53,9 @@ export function generateG() {
  * @returns
  */
 export function generatePublicKey(
-  input: number,
-  privateKey: number,
-  prime: number
-): number {
+  input: Long,
+  privateKey: Long,
+  prime: Long
+): Long {
   return quickMod(input, privateKey, prime);
 }

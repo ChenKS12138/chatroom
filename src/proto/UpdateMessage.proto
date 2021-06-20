@@ -21,7 +21,7 @@ message ChatText {
 
 message SignedPbk {
   repeated string uids = 1;
-  required double pbk = 2;
+  required bytes pbk = 2;
 }
 
 message UpdateMessage {

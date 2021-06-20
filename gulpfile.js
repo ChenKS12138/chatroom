@@ -86,6 +86,16 @@ function dev(doneDev) {
           })
         )
         .pipe(process.stdout);
+      child.stderr
+        .pipe(
+          new stream.Transform({
+            transform(chunk, enc, callback) {
+              this.push("error:instantce[" + alias + "]: " + String(chunk));
+              callback();
+            },
+          })
+        )
+        .pipe(process.stderr);
       children.push(child);
       child.on("exit", (code) => {
         const index = children.findIndex((one) => one === child);

@@ -21,6 +21,7 @@
   "license": "MIT",
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0",
+    "long": "^4.0.0",
     "protobufjs": "^6.11.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",

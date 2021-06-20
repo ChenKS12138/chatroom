@@ -1,3 +1,4 @@
+import type { Long } from "long";
 import * as constants from "./constants";
 
 export interface IUpdateMessage {
@@ -24,5 +25,5 @@ export interface IChatText {
 
 export interface ISignedPbk {
   uids: string[];
-  pbk: number;
+  pbk: Buffer;
 }

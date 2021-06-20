@@ -1,5 +1,6 @@
 import { ChannelType, MessageKind } from "@/common/constants";
 import { ISignedPbk, IRoomUser, IUpdateMessage } from "@/common/interface";
+import Long from "long";
 import { UidList } from "@/common/util";
 import {
   generateG,
@@ -73,7 +74,11 @@ export default class PeerRpcDispatcher extends RpcEventDispatcher {
       case MessageKind.SIGN_PBK:
         const signedPbk: ISignedPbk = chunk;
         if (src === this.uidList.leftPeer) {
-          this.negotiatePbk(this.uidList.uids, signedPbk.pbk, signedPbk.uids);
+          this.negotiatePbk(
+            this.uidList.uids,
+            Long.fromBytes(Array.from(Uint8Array.from(signedPbk.pbk)), false),
+            signedPbk.uids
+          );
         }
         break;
     }
@@ -103,7 +108,7 @@ export default class PeerRpcDispatcher extends RpcEventDispatcher {
   }
   negotiatePbk(
     uids: string[],
-    currentPbk: number = generateG(),
+    currentPbk: Long = generateG(),
     currentUids: string[] = []
   ) {
     if (currentPbk && !currentUids.includes(this.uid)) {
@@ -112,15 +117,18 @@ export default class PeerRpcDispatcher extends RpcEventDispatcher {
       this.log(
         `密钥协商${currentUids.length}/${uids.length}, PBK ${currentPbk}`
       );
-      const pbkInfo = {
-        pbk: currentPbk,
+      const pbkInfo: ISignedPbk = {
+        pbk: Buffer.from(currentPbk.toBytes()),
         uids: currentUids,
       };
       if (currentUids.length < uids.length) {
         this.dispatchCall(MessageKind.SIGN_PBK, pbkInfo);
       } else {
         this.pbkInfo = pbkInfo;
-        this.sendToIpcRender(ChannelType.UPDATE_PBK, String(currentPbk));
+        this.sendToIpcRender(
+          ChannelType.UPDATE_PBK,
+          Buffer.from(currentPbk.toBytes()).toString("base64")
+        );
         this.log(`密钥协商结束, 请使用密钥${currentPbk}加密聊天`);
         this.dispatchCall(MessageKind.DEMAND_STATUS_CHAT);
         clearTimeout(this.negotiateTimer);

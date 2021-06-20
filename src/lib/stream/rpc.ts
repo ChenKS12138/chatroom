@@ -43,7 +43,7 @@ export abstract class RpcEventDispatcher {
   private ipcMain: Electron.IpcMain;
   uid: string;
   emitter: stream.PassThrough;
-  privateKey: number;
+  privateKey: Long;
   pbkInfo: ISignedPbk | null;
   static DISPATCH_CALL_EVENT = "dispatchCall";
   constructor(webContents, ipcMain: electron.IpcMain = electron.ipcMain) {
