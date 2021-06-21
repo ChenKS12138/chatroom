@@ -11,7 +11,7 @@
     "clean": "gulp clean",
     "build:win": "gulp build --win portable",
     "build:mac": "gulp build --mac",
-    "test": "ts-mocha -p tsconfig.json src/**/__test__/*.test.ts "
+    "test": "mocha"
   },
   "keywords": [],
   "author": {
@@ -45,7 +45,7 @@
     "gulp-babel": "^8.0.0",
     "gulp-path-alias": "^1.2.1",
     "mocha": "^9.0.0",
-    "ts-mocha": "^8.0.0",
+    "ts-node": "^10.0.0",
     "typescript": "^4.2.4",
     "yargs": "^17.0.1"
   }

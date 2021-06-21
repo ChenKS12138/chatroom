@@ -1,7 +1,7 @@
 import * as assert from "assert";
 import { quickMod, generatePrime, generatePrivateKey } from "../diffie-hellman";
 
-import * as Long from "long";
+import Long from "long";
 
 describe("Diffie Hellman", () => {
   describe("quickMod", () => {
