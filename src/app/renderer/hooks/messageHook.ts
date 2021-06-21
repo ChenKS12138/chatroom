@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { ipcRenderer } from "electron";
 import * as constants from "@/common/constants";
 
@@ -45,19 +45,45 @@ export function useMessageListener(
   }, [...deps]);
 }
 
-const messageStore = new Map();
+const messageStore = new Map<
+  string,
+  { value: any; cbs: ((value: any) => void)[] }
+>();
 
-export function useMessageValue<T extends any>(key: constants.ChannelType): T {
-  const [value, setValue] = useState<T | null>(messageStore.get(key));
+export function useMessageValue<T extends any>(
+  key: constants.ChannelType,
+  defaultValue: T
+): T {
+  const [value, setValue] = useState<T>(
+    messageStore.get(key)?.value ?? defaultValue
+  );
   useEffect(() => {
+    let target = messageStore.get(key);
     const callback = (_evt, nextValue) => {
-      messageStore.set(key, nextValue);
-      setValue(nextValue);
+      const storeItem = messageStore.get(key);
+      if (storeItem) {
+        storeItem.value = nextValue;
+        storeItem.cbs.forEach((one) => one(nextValue));
+      }
     };
-    ipcRenderer.on(key, callback);
+    if (!target) {
+      target = {
+        value: null,
+        cbs: [],
+      };
+      ipcRenderer.on(key, callback);
+    }
+    target.cbs.push(setValue);
+    messageStore.set(key, target);
     return () => {
-      ipcRenderer.off(key, callback);
+      const index = target?.cbs.findIndex((one) => one === setValue);
+      if (index && index !== -1) {
+        target?.cbs.splice(index, 1);
+        if (target?.cbs.length === 0) {
+          ipcRenderer.off(key, callback);
+        }
+      }
     };
   }, [key, setValue]);
-  return value as T;
+  return value;
 }

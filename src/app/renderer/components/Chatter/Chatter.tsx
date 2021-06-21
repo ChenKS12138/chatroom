@@ -106,7 +106,7 @@ export function Chatter({
 }
 
 function ChatRecord({ text, uid, encrypted, type }: IChatterRecord) {
-  const pbk = useMessageValue<string>(constants.ChannelType.UPDATE_PBK);
+  const pbk = useMessageValue<string>(constants.ChannelType.UPDATE_PBK, "");
   const { decrypt } = useCrypto();
   const [decryptedMsg, setDecryptedMsg] = useState("");
 
