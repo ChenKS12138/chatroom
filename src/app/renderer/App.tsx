@@ -15,9 +15,9 @@ export default function App() {
   const [isServer, setIsServer] = useState(false);
   const [records, setRecords] = useState<IChatterRecord[]>([]);
   const [disableChatter, setDisableChatter] = useState(false);
-  const uid = useMessageValue(constants.ChannelType.UPDATE_UID);
-  const pbk = useMessageValue<string>(constants.ChannelType.UPDATE_PBK);
-  const uids = useMessageValue<string[]>(constants.ChannelType.UPDATE_UIDS);
+  const uid = useMessageValue<string>(constants.ChannelType.UPDATE_UID, "");
+  const pbk = useMessageValue<string>(constants.ChannelType.UPDATE_PBK, "");
+  const uids = useMessageValue<string[]>(constants.ChannelType.UPDATE_UIDS, []);
   const { encrypt } = useCrypto();
 
   const rpcCall = useRpcCall();
@@ -139,7 +139,7 @@ export default function App() {
       />
       <div className="pinned-info">
         <div>房间在线人数: {uids?.length ?? 0}</div>
-        <div>uid: {uid ?? "(进入房间自动生成uid)"}</div>
+        <div>uid: {uid?.length ? uid : "(进入房间自动生成uid)"}</div>
       </div>
     </div>
   );
@@ -202,13 +202,13 @@ function ServerControl({ isWorking, isServer }: IServerControl) {
   return (
     <div className="box box_server-controll">
       <button disabled={isWorking} onClick={handleClickServerStart}>
-        start server
+        启动服务
       </button>
       <button
         disabled={!(isWorking && isServer)}
         onClick={handleClickServerStop}
       >
-        stop server
+        关闭服务
       </button>
     </div>
   );
@@ -248,13 +248,13 @@ function ClientControl({ isServer, isWorking }: IClientControl) {
         onInput={handleAddrInput}
       />
       <button disabled={isWorking} onClick={handleClickClientStart}>
-        connect to server
+        连接服务
       </button>
       <button
         disabled={!(isWorking && !isServer)}
         onClick={handleClickClientStop}
       >
-        disconnect to server
+        断开连接
       </button>
     </div>
   );

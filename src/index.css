@@ -21,14 +21,16 @@ body {
 }
 
 .status-light[data-status="inactive"]::after {
-  content: "Inactive";
+  content: "未连接";
+  word-break: keep-all;
 }
 
 .status-light[data-status="active"] {
   background-color: green;
 }
 .status-light[data-status="active"]::after {
-  content: "Activate";
+  content: "已连接";
+  word-break: keep-all;
 }
 
 .box {
