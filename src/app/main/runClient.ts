@@ -29,32 +29,18 @@ export function runClientApp(mainWindow: BrowserWindow) {
       );
       const rpcStream = new RpcStream(rpcEventDispatcher);
 
-      let heartbeatTimer;
       connection.on("connect", () => {
         mainWindow.webContents.send(
           constants.ChannelType.CLIENT_ON_SERVER_CONNECTED
         );
-        heartbeatTimer = setImmediatelyInterval(() => {
-          rpcEventDispatcher.dispatchCall(
-            constants.MessageKind.BROADCAST_HEARTBEAT,
-            rpcEventDispatcher.uid
-          );
-          rpcEventDispatcher.updateRenderUids();
-        }, 500);
+        rpcEventDispatcher.startHeartbeat();
       });
 
       connection.on("close", () => {
         mainWindow.webContents.send(
           constants.ChannelType.CLIENT_ON_SERVER_DISCONNECTED
         );
-        if (heartbeatTimer) {
-          clearInterval(heartbeatTimer);
-          rpcEventDispatcher.sendToIpcRender(
-            constants.ChannelType.UPDATE_UIDS,
-            []
-          );
-          heartbeatTimer = null;
-        }
+        rpcEventDispatcher.stopHeartbeat();
         connection.destroy();
       });
 

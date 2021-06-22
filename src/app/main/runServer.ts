@@ -24,7 +24,6 @@ export function runServerApp(mainWindow: BrowserWindow) {
 
     const rpcStream = new RpcStream(rpcEventDispatcher);
 
-    let heartbeatTimer;
     serverPort.on("startServer", () => {
       mainWindow.webContents.send(
         constants.ChannelType.SERVER_ON_SERVE_START,
@@ -36,13 +35,7 @@ export function runServerApp(mainWindow: BrowserWindow) {
       ipcMain.once(constants.ChannelType.SERVER_STOP, () => {
         serverPort.emit("stopServer");
       });
-      heartbeatTimer = setInterval(() => {
-        rpcEventDispatcher.dispatchCall(
-          constants.MessageKind.BROADCAST_HEARTBEAT,
-          rpcEventDispatcher.uid
-        );
-        rpcEventDispatcher.updateRenderUids();
-      }, 500);
+      rpcEventDispatcher.startHeartbeat();
     });
 
     serverPort.on("addClient", () => {
@@ -60,14 +53,7 @@ export function runServerApp(mainWindow: BrowserWindow) {
       serverPort.destroy();
       serverPort.end();
       mainWindow.webContents.send(constants.ChannelType.SERVER_ON_SERVE_STOP);
-      if (heartbeatTimer) {
-        clearInterval(heartbeatTimer);
-        rpcEventDispatcher.sendToIpcRender(
-          constants.ChannelType.UPDATE_UIDS,
-          []
-        );
-        heartbeatTimer = null;
-      }
+      rpcEventDispatcher.stopHeartbeat();
     });
 
     // Pipe Msg, Client -> Server

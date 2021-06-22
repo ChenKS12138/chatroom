@@ -1,7 +1,7 @@
 import { ChannelType, MessageKind } from "@/common/constants";
 import { ISignedPbk, IRoomUser, IUpdateMessage } from "@/common/interface";
 import Long from "long";
-import { UidList } from "@/common/util";
+import { setImmediatelyInterval, UidList } from "@/common/util";
 import {
   generateG,
   generatePrime,
@@ -13,9 +13,10 @@ import * as proto from "@/proto";
 import electron from "electron";
 
 export default class PeerRpcDispatcher extends RpcEventDispatcher {
-  uidList: UidList;
+  private uidList: UidList;
   static NEGOTIATE_PBK_TIMEOUT = 3000; // 3000ms
   private negotiateTimer: any;
+  private heartbeatTimer: any;
   constructor(webContents, ipcMain: Electron.IpcMain = electron.ipcMain) {
     super(webContents, ipcMain);
     this.uidList = new UidList(this.uid, 1000);
@@ -27,6 +28,7 @@ export default class PeerRpcDispatcher extends RpcEventDispatcher {
       this.log(`${uid}加入了聊天室`);
     });
     this.negotiateTimer = null;
+    this.heartbeatTimer = null;
   }
   encodeRpcUpdateMessageChunk(kind: MessageKind, ...args: any): Buffer {
     if (kind === MessageKind.BROADCAST_TEXT) {
@@ -139,5 +141,18 @@ export default class PeerRpcDispatcher extends RpcEventDispatcher {
   updatePrivateKey() {
     this.privateKey = generatePrivateKey();
     this.log(`请勿泄露!!!私钥为${this.privateKey}`);
+  }
+  startHeartbeat() {
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+    }
+    this.heartbeatTimer = setImmediatelyInterval(() => {
+      this.dispatchCall(MessageKind.BROADCAST_HEARTBEAT, this.uid);
+    }, 500);
+  }
+  stopHeartbeat() {
+    clearInterval(this.heartbeatTimer);
+    this.heartbeatTimer = null;
+    this.updateRenderUids();
   }
 }
