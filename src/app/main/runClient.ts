@@ -12,7 +12,6 @@ import {
 } from "@/lib/stream";
 import { RpcStream } from "@/lib/stream/rpc";
 import PeerRpcDispatcher from "./peerRpcDispatcher";
-import { setImmediatelyInterval } from "@/common/util";
 
 export function runClientApp(mainWindow: BrowserWindow) {
   ipcMain.on(

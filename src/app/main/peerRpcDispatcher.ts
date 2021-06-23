@@ -149,10 +149,11 @@ export default class PeerRpcDispatcher extends RpcEventDispatcher {
     this.heartbeatTimer = setImmediatelyInterval(() => {
       this.dispatchCall(MessageKind.BROADCAST_HEARTBEAT, this.uid);
     }, 500);
+    this.sendToIpcRender(ChannelType.UPDATE_UIDS, []);
   }
   stopHeartbeat() {
     clearInterval(this.heartbeatTimer);
     this.heartbeatTimer = null;
-    this.updateRenderUids();
+    this.sendToIpcRender(ChannelType.UPDATE_UIDS, []);
   }
 }
